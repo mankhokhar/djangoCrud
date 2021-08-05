@@ -11,15 +11,24 @@
     <img src="{{ post.image.url }}">
     <div class="inline">
         <p> Reacts: {{ post.reacts }} </p>
-        <form method="post" name="react_form" action="{% url 'posts:react' post.id %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-dark"> React</button>
-        </form>
+            <a href="{% url 'posts:react' post.id %}"> <button class="btn btn-dark"> React </button> </a>
     </div>
     <div>
         <ul>
         {% for comment in post.comment_set.all %}
-            <li> {{comment.comment_text}} </li>
+            <li id="comment_{{ comment.id }}"> {{comment.comment_text}}
+                <a href="{% url 'posts:delete' comment.id%}"> <button class="btn btn-danger">Delete</button> </a>
+                <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#commentEdit{{comment.id}}}" aria-expanded="false" aria-controls="commentEdit{{comment.id}}">
+                Edit
+                </button>
+                <div class="collapse" id="commentEdit{{ comment.id }}}">
+                    <form method="post" name="comment_edit_form" action="{% url 'posts:update' comment.id %}">
+                        {% csrf_token %}
+                        <input type="text" id="comment_text_edit" name="comment_text_edit" placeholder="Enter new comment">
+                        <button type="submit" class="btn btn-green">Update</button>
+                    </form>
+                </div>
+            </li>
         {% endfor %}
         </ul>
     </div>
