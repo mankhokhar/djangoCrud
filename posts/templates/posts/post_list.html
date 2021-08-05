@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{%  block content %}
+{% for post in posts_list %}
+<hr>
+
+<div id="Post{{ forloop.counter }}" class="align-self-center outline-black">
+    <h2> {{ post.title }} </h2>
+    <p> {{ post.description }} </p>
+    <p>Published on {{ post.pub_date }}</p>
+    <img src="{{ post.image.url }}">
+    <div class="inline">
+        <p> Reacts: {{ post.reacts }} </p>
+        <button type="button" class="btn btn-dark"> React</button>
+    </div>
+    <div>
+        <ul>
+        {% for comment in post.comment_set.all %}
+            <li> {{comment.comment_text}} </li>
+        {% endfor %}
+        </ul>
+    </div>
+    <input type="text" placeholder="Comment">
+    <button type="button" class="btn">Add Comment</button>
+</div>
+
+{% endfor %}
+{% endblock content %}
