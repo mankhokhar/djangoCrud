@@ -11,7 +11,10 @@
     <img src="{{ post.image.url }}">
     <div class="inline">
         <p> Reacts: {{ post.reacts }} </p>
-        <button type="button" class="btn btn-dark"> React</button>
+        <form method="post" name="react_form" action="{% url 'posts:react' post.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-dark"> React</button>
+        </form>
     </div>
     <div>
         <ul>
@@ -20,8 +23,11 @@
         {% endfor %}
         </ul>
     </div>
-    <input type="text" placeholder="Comment">
-    <button type="button" class="btn">Add Comment</button>
+    <form method="post" name="comment_form" action="{% url 'posts:add_comment' post.id %}">
+        {% csrf_token %}
+        <input type="text" name='comment_text' placeholder="Comment">
+        <button type="submit" class="btn">Add Comment</button>
+    </form>
 </div>
 
 {% endfor %}
