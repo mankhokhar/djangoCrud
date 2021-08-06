@@ -10,6 +10,7 @@ class Post(models.Model):
     reacts = models.IntegerField(default=0)
     image = models.ImageField(blank=True)
 
+
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     comment_text = models.TextField(blank=True)
