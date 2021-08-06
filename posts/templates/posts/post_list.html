@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{%  block content %}
+{% block content %}
 {% for post in posts_list %}
 <div class="card mr-auto">
     <div class="card-body align-self-center">
@@ -24,7 +24,7 @@
                         <div class="collapse" id="commentEdit{{ comment.id }}}">
                             <form method="post" name="comment_edit_form" action="{% url 'posts:update' comment.id %}">
                                 {% csrf_token %}
-                                <input type="text" id="comment_text_edit" name="comment_text_edit" placeholder="Enter new comment">
+                                {{ comment_form }}
                                 <button type="submit" class="btn btn-green">Update</button>
                             </form>
                         </div>
@@ -33,8 +33,10 @@
                 </ul>
             </div>
             <form method="post" name="comment_form" action="{% url 'posts:add_comment' post.id %}">
+
                 {% csrf_token %}
-                <input type="text" name='comment_text' placeholder="Comment">
+                {{ comment_form }}
+<!--                <input type="text" name='comment_text' placeholder="Comment">-->
                 <button type="submit" class="btn">Add Comment</button>
             </form>
         </div>
