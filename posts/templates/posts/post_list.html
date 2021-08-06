@@ -9,14 +9,14 @@
             <p> {{ post.description }} </p>
             <p>Published on {{ post.pub_date }}</p>
             <img src="{{ post.image.url }}">
+            <br>
             <div class="inline">
-                <p> Reacts: {{ post.reacts }} </p>
-                    <a href="{% url 'posts:react' post.id %}"> <button class="btn btn-dark"> React </button> </a>
+                <p> Reacts: {{ post.reacts }}</p> <a href="{% url 'posts:react' post.id %}"> <button class="btn btn-dark btn-small"> React </button> </a>
             </div>
             <div>
-                <ul>
+                <ul class="list-group-flush">
                 {% for comment in post.comment_set.all %}
-                    <li id="comment_{{ comment.id }}"> {{comment.comment_text}}
+                    <li class="list-group-item" id="comment_{{ comment.id }}"> {{comment.comment_text}}
                         <a href="{% url 'posts:delete' comment.id%}"> <button class="btn btn-danger">Delete</button> </a>
                         <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#commentEdit{{comment.id}}}" aria-expanded="false" aria-controls="commentEdit{{comment.id}}">
                         Edit
@@ -24,8 +24,10 @@
                         <div class="collapse" id="commentEdit{{ comment.id }}}">
                             <form method="post" name="comment_edit_form" action="{% url 'posts:update' comment.id %}">
                                 {% csrf_token %}
-                                <input type="text" id="comment_text_edit" name="comment_text_edit" placeholder="Enter new comment">
-                                <button type="submit" class="btn btn-green">Update</button>
+                                <div class="form-inline form-group mx-sm-10 mb-2">
+                                    <input class="form-control" type="text" id="comment_text_edit" name="comment_text_edit" placeholder="Enter new comment">
+                                    <button type="submit" class="btn btn-green row-10">Update</button>
+                                </div>
                             </form>
                         </div>
                     </li>

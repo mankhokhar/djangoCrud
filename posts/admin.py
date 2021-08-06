@@ -11,7 +11,7 @@ class CommentsInline(admin.TabularInline):
 
 class PostAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields': ['title' ,'image']}),
+        (None, {'fields': ['title' ,'image', 'description']}),
         ('Date Information', {'fields': ['pub_date']})
     ]
     inlines = [CommentsInline]
