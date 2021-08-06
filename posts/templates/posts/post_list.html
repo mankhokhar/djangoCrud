@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{%  block content %}
+{% for post in posts_list %}
+<hr>
+
+<div id="Post{{ forloop.counter }}" class="align-self-center outline-black">
+    <h2> {{ post.title }} </h2>
+    <p> {{ post.description }} </p>
+    <p>Published on {{ post.pub_date }}</p>
+    <img src="{{ post.image.url }}">
+    <div class="inline">
+        <p> Reacts: {{ post.reacts }} </p>
+            <a href="{% url 'posts:react' post.id %}"> <button class="btn btn-dark"> React </button> </a>
+    </div>
+    <div>
+        <ul>
+        {% for comment in post.comment_set.all %}
+            <li id="comment_{{ comment.id }}"> {{comment.comment_text}}
+                <a href="{% url 'posts:delete' comment.id%}"> <button class="btn btn-danger">Delete</button> </a>
+                <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#commentEdit{{comment.id}}}" aria-expanded="false" aria-controls="commentEdit{{comment.id}}">
+                Edit
+                </button>
+                <div class="collapse" id="commentEdit{{ comment.id }}}">
+                    <form method="post" name="comment_edit_form" action="{% url 'posts:update' comment.id %}">
+                        {% csrf_token %}
+                        <input type="text" id="comment_text_edit" name="comment_text_edit" placeholder="Enter new comment">
+                        <button type="submit" class="btn btn-green">Update</button>
+                    </form>
+                </div>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+    <form method="post" name="comment_form" action="{% url 'posts:add_comment' post.id %}">
+        {% csrf_token %}
+        <input type="text" name='comment_text' placeholder="Comment">
+        <button type="submit" class="btn">Add Comment</button>
+    </form>
+</div>
+
+{% endfor %}
+{% endblock content %}
