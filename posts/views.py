@@ -1,5 +1,7 @@
+import json
+
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 
 
 from .models import Post, Comment
@@ -20,13 +22,18 @@ def react(request, post_id):
     return HttpResponseRedirect('/')
 
 
-def add_comment(request, post_id):
+def add_comment(request):
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
+            post_id = request.POST['post_id']
             post = get_object_or_404(Post, pk=post_id)
-            post.comment_set.create(comment_text=request.POST['comment_text'])
-            return HttpResponseRedirect('/')
+            comment = post.comment_set.create(comment_text=request.POST['comment_text'])
+            data = {**form.cleaned_data, **{'comment_id': comment.id}}
+            return HttpResponse(
+                json.dumps(data),
+                content_type='application/json'
+            )
     else:
         form = CommentForm()
     return HttpResponseRedirect('/')
@@ -38,14 +45,19 @@ def delete(request, comment_id):
     return HttpResponseRedirect('/')
 
 
-def update_comment(request, comment_id):
+def update_comment(request):
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
+            print(request.POST)
+            comment_id = request.POST['comment_id']
             comment = get_object_or_404(Comment, pk=comment_id)
             comment.comment_text = request.POST['comment_text']
             comment.save()
-            return HttpResponseRedirect('/')
+            return HttpResponse(
+                json.dumps(form.cleaned_data),
+                content_type='application/json'
+            )
     else:
         form = CommentForm()
     return HttpResponseRedirect('/')

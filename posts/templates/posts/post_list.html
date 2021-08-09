@@ -4,7 +4,7 @@
 {% for post in posts_list %}
 <div class="card mr-auto">
     <div class="card-body align-self-center">
-        <div id="Post{{ forloop.counter }}" class="align-self-center outline-black">
+        <div id="Post{{ post.id }}" class="align-self-center outline-black">
             <h2 class="card-title font-weight-bold"> {{ post.title }} </h2>
             <p class="card-text"> {{ post.description }} </p>
             <p>Published on {{ post.pub_date }}</p>
@@ -16,26 +16,25 @@
             <div>
                 <ul class="list-group list-group-flush">
                 {% for comment in post.comment_set.all %}
-                    <li id="comment_{{ comment.id }}" class="list-group-item"> {{comment.comment_text}}
-                        <a href="{% url 'posts:delete' comment.id%}"> <button class="btn btn-danger">Delete</button> </a>
-                        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#commentEdit{{comment.id}}}" aria-expanded="false" aria-controls="commentEdit{{comment.id}}">
+                    <li id="comment_{{ comment.id }}" class="list-group-item"> <div id="comment_{{ comment.id }}_text"> {{comment.comment_text}} </div>
+                        <button class="btn btn-danger" onclick="deleteComment({{ comment.id }})">Delete</button>
+                        <button class="btn btn-primary" id="hideShow" type="button" data-toggle="collapse" data-target="#commentEditForm{{ comment.id }}" aria-expanded="false" aria-controls="commentEdit{{comment.id}}">
                         Edit
                         </button>
-                        <div class="collapse" id="commentEdit{{ comment.id }}}">
-                            <form method="post" name="comment_edit_form" action="{% url 'posts:update' comment.id %}">
+                        <div class="collapse" id="commentEditForm{{ comment.id }}">
+                            <form method="post" class="comment_edit_form" id="commentEdit{{ comment.id }}" action="{% url 'posts:update_comment' %}">
                                 {% csrf_token %}
                                 {{ comment_form }}
-                                <button type="submit" class="btn btn-green">Update</button>
+                                <button type="submit" class="btn btn-success">Update</button>
                             </form>
                         </div>
                     </li>
                 {% endfor %}
                 </ul>
             </div>
-            <form method="post" name="comment_form" action="{% url 'posts:add_comment' post.id %}">
+            <form method="post" class="comment_add_form" name="comment_form" id="addComment{{ post.id }}" action="{% url 'posts:add_comment' %}">
                 {% csrf_token %}
                 {{ comment_form }}
-<!--                <input type="text" name='comment_text' placeholder="Comment">-->
                 <button type="submit" class="btn">Add Comment</button>
             </form>
         </div>
@@ -43,4 +42,6 @@
 </div>
 <br>
 {% endfor %}
+
 {% endblock content %}
+
