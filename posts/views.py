@@ -15,11 +15,15 @@ def post_list_view(request):
     return render(request, 'posts/post_list.html', context={'posts_list': posts, 'comment_form': comment_form})
 
 
-def react(request, post_id):
+def react(request):
+    post_id = request.GET['post_id']
     post = get_object_or_404(Post, pk=post_id)
     post.reacts += 1
     post.save()
-    return HttpResponseRedirect('/')
+    return HttpResponse(
+        json.dumps({'reacts': post.reacts}),
+        content_type='application/json'
+    )
 
 
 def add_comment(request):
@@ -39,17 +43,10 @@ def add_comment(request):
     return HttpResponseRedirect('/')
 
 
-def delete(request, comment_id):
-    comment = get_object_or_404(Comment, pk=comment_id)
-    comment.delete()
-    return HttpResponseRedirect('/')
-
-
 def update_comment(request):
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
-            print(request.POST)
             comment_id = request.POST['comment_id']
             comment = get_object_or_404(Comment, pk=comment_id)
             comment.comment_text = request.POST['comment_text']
@@ -61,3 +58,10 @@ def update_comment(request):
     else:
         form = CommentForm()
     return HttpResponseRedirect('/')
+
+
+def delete_comment(request):
+    comment_id = request.GET['comment_id']
+    comment = get_object_or_404(Comment, pk=comment_id)
+    comment.delete()
+    return HttpResponse()

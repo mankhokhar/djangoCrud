@@ -4,20 +4,20 @@
 {% for post in posts_list %}
 <div class="card mr-auto">
     <div class="card-body align-self-center">
-        <div id="Post{{ post.id }}" class="align-self-center outline-black">
+        <div id="Post{{ post.id }}" class="align-self-center outline-black post">
             <h2 class="card-title font-weight-bold"> {{ post.title }} </h2>
             <p class="card-text"> {{ post.description }} </p>
             <p>Published on {{ post.pub_date }}</p>
             <img src="{{ post.image.url }}">
             <div class="inline">
-                <p> Reacts: {{ post.reacts }} </p>
-                    <a href="{% url 'posts:react' post.id %}"> <button class="btn btn-dark"> React </button> </a>
+                <p> Reacts: <p class="num_reacts"> {{ post.reacts }} </p> </p>
+                    <button class="btn btn-dark react_button"> React </button>
             </div>
             <div>
                 <ul class="list-group list-group-flush">
                 {% for comment in post.comment_set.all %}
                     <li id="comment_{{ comment.id }}" class="list-group-item"> <div id="comment_{{ comment.id }}_text"> {{comment.comment_text}} </div>
-                        <button class="btn btn-danger" onclick="deleteComment({{ comment.id }})">Delete</button>
+                        <button class="btn btn-danger delete_comment">Delete</button>
                         <button class="btn btn-primary" id="hideShow" type="button" data-toggle="collapse" data-target="#commentEditForm{{ comment.id }}" aria-expanded="false" aria-controls="commentEdit{{comment.id}}">
                         Edit
                         </button>

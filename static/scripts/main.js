@@ -1,30 +1,36 @@
-function deleteComment(comment_id){
-    let confirmation = confirm("Delete this comment?")
-    if (confirmation) {
-        window.location.replace(`/${comment_id}/delete`);
-    }
-}
-
 $(document).ready( ()=>{
-    attachFunc2Forms()
+    $(".comment_edit_form").on('submit',edit_comment_handler)
+    $(".comment_add_form").on('submit', add_comment_handler)
+    $(".delete_comment").on('click', delete_comment_handler)
+    $(".react_button").on('click', react_handler)
 })
 
-function attachFunc2Forms(){
-    $(".comment_edit_form").on('submit', function(event){
+function edit_comment_handler(event){
     event.preventDefault();
     comment_id = parseInt(this.id.match(/[0-9]+/)[0]);
     data={'comment_id': comment_id ,
          comment_text : $(this).find('.form-control').val(),}
-    formPostControl(this, 'update_comment/', id=comment_id, data=data ,callback=edit_comment);
-    });
+    serverRequestControl(this, method='POST', url='update_comment/', id=comment_id, data=data ,callback=edit_comment);
+}
 
-    $(".comment_add_form").on('submit', function(event){
+function add_comment_handler(event){
     event.preventDefault();
     post_id = parseInt(this.id.match(/[0-9]+/)[0]);
     data={'post_id': post_id ,
          comment_text : $(this).find('.form-control').val(),};
-    formPostControl(this, 'add_comment/', id=post_id, data=data ,callback=add_comment);
-    });
+    serverRequestControl(this, method='POST', url='add_comment/', id=post_id, data=data ,callback=add_comment);
+}
+
+function delete_comment_handler(event){
+        comment_id = parseInt($(this).parent().attr('id').match(/[0-9]+/)[0]);
+        serverRequestControl(this,method='GET',url='/delete_comment/',
+                              id=comment_id, data={'comment_id': comment_id}, callback= delete_comment)
+}
+
+function react_handler(event){
+    post_id = parseInt($(this).parents('.post').attr('id').match(/[0-9]+/)[0]);
+    serverRequestControl(this,method='GET',url='/react/',
+                              id=post_id, data={'post_id': post_id}, callback= react)
 }
 
 function edit_comment(comment_id, json){
@@ -36,7 +42,7 @@ function edit_comment(comment_id, json){
 function add_comment(post_id, json){
     comment_id = json.comment_id
     html = `<li id="comment_${comment_id}" class="list-group-item"> <div id="comment_${comment_id}_text"> ${json.comment_text} </div>
-                        <button class="btn btn-danger" onclick="deleteComment(${comment_id})">Delete</button>
+                        <button class="btn btn-danger delete_comment">Delete</button>
                         <button class="btn btn-primary" id="hideShow" type="button" data-toggle="collapse" data-target="#commentEditForm${comment_id}" aria-expanded="false" aria-controls="commentEdit${comment_id}">
                         Edit
                         </button>
@@ -49,19 +55,31 @@ function add_comment(post_id, json){
                         </div>
                     </li>`
     $(`#Post${post_id} .list-group`).append(html);
-    attachFunc2Forms();
+    $(`#comment_${comment_id} .delete_comment`).on('click', delete_comment_handler)
+    $(`#comment_${comment_id} .comment_edit_form`).on('submit', edit_comment_handler)
 }
 
+function delete_comment(comment_id,json){
+    $(`#comment_${comment_id}`).remove();
+}
 
-function formPostControl(element, url, id, data ,callback){
+function react(post_id, json){
+    $(`#Post${post_id} .num_reacts`).text(json.reacts)
+}
+
+function serverRequestControl(element, method, url, id, data ,callback){
+    if (method=='POST'){
     csrftoken = {'csrfmiddlewaretoken': $(element).find('[name=csrfmiddlewaretoken]').val()}
     data = Object.assign({}, csrftoken, data);
+    }
     $.ajax({
         url : url,
-        type : 'POST',
+        type : method,
         data : data,
         success: function(json){
-            $(element).find('.form-control').val('');
+            if (method=='POST'){
+                $(element).find('.form-control').val('');
+                }
             callback(id,json);
         },
         error : function(xhr,errmsg,err) {
