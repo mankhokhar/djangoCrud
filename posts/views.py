@@ -75,3 +75,11 @@ def delete_comment(request):
     comment = get_object_or_404(Comment, pk=comment_id)
     comment.delete()
     return HttpResponse()
+
+def add_post(request):
+    if request.method == 'POST':
+        print(request.POST['post_title'], request.FILES['post_file'].name, request.POST['post_desc'])
+        post = Post.objects.create(title=request.POST['post_title'], image=request.FILES['post_file'], description=request.POST['post_desc'])
+
+    return HttpResponseRedirect('/')
+
