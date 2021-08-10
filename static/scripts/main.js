@@ -3,7 +3,20 @@ $(document).ready( ()=>{
     $(".comment_add_form").on('submit', add_comment_handler)
     $(".delete_comment").on('click', delete_comment_handler)
     $(".react_button").on('click', react_handler)
+    $(".search_form").on('submit', search_handler)
+    $(".search_bar").on('keyup', search_handler)
 })
+
+function search_handler(event){
+    event.preventDefault();
+    if ($(this).hasClass('search_bar')){
+        serverRequestControl(this,method='GET',url='/search/',
+                              id=0, data={'q': $(this).val()}, callback= search_result)
+    }else{
+        serverRequestControl(this,method='GET',url='/search/',
+                              id=0, data={'q': $(this).find('.form-control').val()}, callback= search_result)
+    }
+}
 
 function edit_comment_handler(event){
     event.preventDefault();
@@ -40,26 +53,12 @@ function edit_comment(comment_id, json){
 }
 
 function add_comment(post_id, json){
-    comment_id = json.comment_id
-    html = `<li id="comment_${comment_id}" class="list-group-item"> <div id="comment_${comment_id}_text"> ${json.comment_text} </div>
-                        <button class="btn btn-danger delete_comment">Delete</button>
-                        <button class="btn btn-primary" id="hideShow" type="button" data-toggle="collapse" data-target="#commentEditForm${comment_id}" aria-expanded="false" aria-controls="commentEdit${comment_id}">
-                        Edit
-                        </button>
-                        <div class="collapse" id="commentEditForm${comment_id}">
-                            <form method="post" class="comment_edit_form" id="commentEdit${comment_id}" action="/update_comment/">
-                                <input type="hidden" name="csrfmiddlewaretoken" value="${Cookies.get('csrftoken')}"/>
-                                <input type="text" name="comment_text" class="form-control" placeholder="Comment Here" required id="id_comment_text">
-                                <button type="submit" class="btn btn-success">Update</button>
-                            </form>
-                        </div>
-                    </li>`
-    $(`#Post${post_id} .list-group`).append(html);
-    $(`#comment_${comment_id} .delete_comment`).on('click', delete_comment_handler)
-    $(`#comment_${comment_id} .comment_edit_form`).on('submit', edit_comment_handler)
+    $(`#Post${post_id} .list-group`).append(json.html_view);
+    $(`#comment_${json.comment_id} .delete_comment`).on('click', delete_comment_handler)
+    $(`#comment_${json.comment_id} .comment_edit_form`).on('submit', edit_comment_handler)
 }
 
-function delete_comment(comment_id,json){
+function delete_comment(comment_id,response){
     $(`#comment_${comment_id}`).remove();
 }
 
@@ -67,20 +66,28 @@ function react(post_id, json){
     $(`#Post${post_id} .num_reacts`).text(json.reacts)
 }
 
+function search_result (id=0, response){
+    $('.posts_list').html(response);
+    $(".comment_edit_form").on('submit',edit_comment_handler)
+    $(".comment_add_form").on('submit', add_comment_handler)
+    $(".delete_comment").on('click', delete_comment_handler)
+    $(".react_button").on('click', react_handler)
+}
+
 function serverRequestControl(element, method, url, id, data ,callback){
     if (method=='POST'){
-    csrftoken = {'csrfmiddlewaretoken': $(element).find('[name=csrfmiddlewaretoken]').val()}
-    data = Object.assign({}, csrftoken, data);
+        csrftoken = {'csrfmiddlewaretoken': $(element).find('[name=csrfmiddlewaretoken]').val()};
+        data = Object.assign({}, csrftoken, data);
     }
     $.ajax({
         url : url,
         type : method,
         data : data,
-        success: function(json){
+        success: function(response){
             if (method=='POST'){
                 $(element).find('.form-control').val('');
-                }
-            callback(id,json);
+                };
+            callback(id,response);
         },
         error : function(xhr,errmsg,err) {
             $('#results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
