@@ -33,7 +33,7 @@ def react(request):
 def search_post(request):
     query_parameter = request.GET['q']
     posts = Post.objects.filter(title__icontains=query_parameter).order_by('-pub_date')
-    html = render_to_string('posts/post.html', {'posts_list': posts, 'comment_form': CommentForm, 'csrf_token': get_token(request)})
+    html = render_to_string('posts/list_view.html', {'posts_list': posts, 'comment_form': CommentForm, 'csrf_token': get_token(request)})
     return HttpResponse(html)
 
 
@@ -81,8 +81,12 @@ def delete_comment(request):
 
 def add_post(request):
     if request.method == 'POST':
-        post = Post.objects.create(title=request.POST['post_title'], image=request.FILES['post_file'],
-                                   description=request.POST['post_desc'])
+        if request.FILES:
+            post = Post.objects.create(title=request.POST['post_title'], image=request.FILES['post_file'],
+                                       description=request.POST['post_desc'])
+        else:
+            post = Post.objects.create(title=request.POST['post_title'],
+                                       description=request.POST['post_desc'])
 
     return HttpResponseRedirect('/')
 

@@ -58,7 +58,7 @@ function add_comment_handler(event){
 function delete_comment_handler(event){
     let confirmation = confirm("DO YOU WANT TO DELETE THIS COMMENT?")
     if (confirmation){
-    let comment_id = parseInt($(this).parent().attr('id').match(/[0-9]+/)[0]);
+    let comment_id = parseInt($(this).parents('.comment').attr('id').match(/[0-9]+/)[0]);
     serverRequestControl(this,method='GET',url='/delete_comment/',
     id=comment_id, data={'comment_id': comment_id}, callback= delete_comment)
     }
@@ -78,6 +78,7 @@ function edit_comment(comment_id, json){
 
 function add_comment(post_id, json){
     $(`#Post${post_id} .list-group`).append(json.html_view);
+    console.log(json.html_view)
     $(`#comment_${json.comment_id} .delete_comment`).on('click', delete_comment_handler)
     $(`#comment_${json.comment_id} .comment_edit_form`).on('submit', edit_comment_handler)
 }
