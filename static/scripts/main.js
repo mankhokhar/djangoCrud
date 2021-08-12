@@ -60,5 +60,10 @@ function serverRequestControl(element, method, url, id, data ,callback){
     });
 }
 
+$(document.ready(function(){
+    $('#create_form').validate({
+    })
+
+})
 
 
