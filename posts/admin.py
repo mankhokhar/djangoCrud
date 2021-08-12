@@ -12,7 +12,6 @@ class CommentsInline(admin.TabularInline):
 class PostAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {'fields': ['title' ,'image', 'description']}),
-        ('Date Information', {'fields': ['pub_date']})
     ]
     inlines = [CommentsInline]
     list_display = ('title', 'reacts', 'pub_date',)

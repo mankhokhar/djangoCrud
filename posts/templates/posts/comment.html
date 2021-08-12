@@ -1,0 +1,13 @@
+<li id="comment_{{ comment.id }}" class="list-group-item"> <div id="comment_{{ comment.id }}_text"> {{comment.comment_text}} </div>
+    <button class="btn btn-danger delete_comment">Delete</button>
+    <button class="btn btn-primary" id="hideShow" type="button" data-toggle="collapse" data-target="#commentEditForm{{ comment.id }}" aria-expanded="false" aria-controls="commentEdit{{comment.id}}">
+        Edit
+    </button>
+    <div class="collapse" id="commentEditForm{{ comment.id }}">
+        <form method="post" class="comment_edit_form" id="commentEdit{{ comment.id }}" action="{% url 'posts:update_comment' %}">
+            {% csrf_token %}
+            {{ comment_form }}
+            <button type="submit" class="btn btn-success">Update</button>
+        </form>
+    </div>
+</li>

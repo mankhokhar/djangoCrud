@@ -1,47 +1,32 @@
 {% extends 'base.html' %}
 
-{%  block content %}
-{% for post in posts_list %}
-<div class="card mr-auto">
-    <div class="card-body align-self-center">
-        <div id="Post{{ forloop.counter }}" class="align-self-center outline-black">
-            <h2> {{ post.title }} </h2>
-            <p> {{ post.description }} </p>
-            <p>Published on {{ post.pub_date }}</p>
-            <img src="{{ post.image.url }}">
-            <br>
-            <div class="inline">
-                <p> Reacts: {{ post.reacts }}</p> <a href="{% url 'posts:react' post.id %}"> <button class="btn btn-dark btn-small"> React </button> </a>
-            </div>
-            <div>
-                <ul class="list-group-flush">
-                {% for comment in post.comment_set.all %}
-                    <li class="list-group-item" id="comment_{{ comment.id }}"> {{comment.comment_text}}
-                        <a href="{% url 'posts:delete' comment.id%}"> <button class="btn btn-danger">Delete</button> </a>
-                        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#commentEdit{{comment.id}}}" aria-expanded="false" aria-controls="commentEdit{{comment.id}}">
-                        Edit
-                        </button>
-                        <div class="collapse" id="commentEdit{{ comment.id }}}">
-                            <form method="post" name="comment_edit_form" action="{% url 'posts:update' comment.id %}">
-                                {% csrf_token %}
-                                <div class="form-inline form-group mx-sm-10 mb-2">
-                                    <input class="form-control" type="text" id="comment_text_edit" name="comment_text_edit" placeholder="Enter new comment">
-                                    <button type="submit" class="btn btn-green row-10">Update</button>
-                                </div>
-                            </form>
-                        </div>
-                    </li>
-                {% endfor %}
-                </ul>
-            </div>
-            <form method="post" name="comment_form" action="{% url 'posts:add_comment' post.id %}">
-                {% csrf_token %}
-                <input type="text" name='comment_text' placeholder="Comment">
-                <button type="submit" class="btn">Add Comment</button>
-            </form>
+
+{% block content %}
+
+    <div class="post_create_form">
+        <div class="row p-2">
+            <div class="col-4"><h2>Create Post</h2></div>
         </div>
+        <form method="post" , action="{% url 'posts:add_post' %}" class="post_add_form" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row p-2">
+                <div class="col"><input name="post_title" type="text" class="form-control" required placeholder="Title"></div>
+                <div class="col"><div class="custom-file">
+                      <input name="post_file" type="file" class="custom-file-input" id="customFile">
+                      <label class="custom-file-label" for="customFile">Choose file</label>
+                </div></div>
+            </div>
+            <div class="row p-2"> <div class="col"> <input name="post_desc" class="form-control" type="text" placeholder="Default input"> </div> </div>
+            <div class="row p-2"><div class="col-4"> <button class="btn btn-primary btn-mb-2" type="submit"> Post </button> </div></div>
+        </form>
     </div>
+
+<br>
+<div class="posts_list">
+        {% include 'posts/post.html' %}
 </div>
 <br>
-{% endfor %}
+
+
 {% endblock content %}
+
