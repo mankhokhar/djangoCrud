@@ -6,6 +6,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.template.loader import render_to_string
 from django.middleware.csrf import get_token
 from django.conf import settings
+from django.urls import resolve
 
 
 from .models import Post, Comment
@@ -17,6 +18,12 @@ def post_list_view(request):
     posts = Post.objects.order_by('-pub_date')
     comment_form = CommentForm()
     return render(request, 'posts/post_list.html', context={'posts_list': posts, 'comment_form': comment_form})
+
+
+def detail_view(request, pk):
+    post = Post.objects.get(pk=pk)
+    comment_form = CommentForm()
+    return render(request, 'posts/details.html', context={'post': post, 'comment_form': comment_form})
 
 
 def react(request):

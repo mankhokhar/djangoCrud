@@ -1,3 +1,10 @@
-{% for post in posts_list %}
-{% include 'posts/post_template.html' %}
-{% endfor %}
+<div class="posts_list">
+    <br>
+    {% if posts_list %}
+        {% for post in posts_list %}
+            {% include 'posts/post_template.html' %}
+        {% endfor %}
+    {% else %}
+        No Posts to show
+    {% endif %}
+</div>
