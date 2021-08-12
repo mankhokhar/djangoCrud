@@ -6,18 +6,17 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.template.loader import render_to_string
 from django.middleware.csrf import get_token
 from django.conf import settings
-from django.urls import resolve
 
 
 from .models import Post, Comment
-from .forms import CommentForm
+from .forms import CommentForm, PostForm
 # Create your views here.
 
 
-def post_list_view(request):
+def post_list_view(request, post_form=PostForm()):
     posts = Post.objects.order_by('-pub_date')
     comment_form = CommentForm()
-    return render(request, 'posts/post_list.html', context={'posts_list': posts, 'comment_form': comment_form})
+    return render(request, 'posts/post_list.html', context={'posts_list': posts, 'comment_form': comment_form, 'post_form': post_form})
 
 
 def detail_view(request, pk):
@@ -57,9 +56,11 @@ def add_comment(request):
                 json.dumps({'comment_id': comment.id, 'html_view': html}),
                 content_type='application/json'
             )
+        else:
+            post_list_view(request, form)
     else:
         form = CommentForm()
-    return HttpResponseRedirect('/')
+    return
 
 
 def update_comment(request):
@@ -76,7 +77,8 @@ def update_comment(request):
             )
     else:
         form = CommentForm()
-    return HttpResponseRedirect('/')
+    return render(request, 'posts/list_view.html', {'comment_form': form, 'csrf_token': get_token(request)})
+    # return HttpResponseRedirect('/')
 
 
 def delete_comment(request):
@@ -88,12 +90,15 @@ def delete_comment(request):
 
 def add_post(request):
     if request.method == 'POST':
-        if request.FILES:
-            post = Post.objects.create(title=request.POST['post_title'], image=request.FILES['post_file'],
-                                       description=request.POST['post_desc'])
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = Post.objects.create(title=form.cleaned_data.get('title'), image=form.cleaned_data.get('image'),
+                                       description=form.cleaned_data.get('description'))
         else:
-            post = Post.objects.create(title=request.POST['post_title'],
-                                       description=request.POST['post_desc'])
+            return post_list_view(request, form)
+
+    else:
+        form = PostForm()
 
     return HttpResponseRedirect('/')
 
@@ -101,7 +106,8 @@ def add_post(request):
 def delete_post(request):
     if request.method == 'POST':
         post = get_object_or_404(Post, pk=request.POST.get('post_id'))
-        os.remove(settings.MEDIA_ROOT+'/' +post.image.name)
+        if post.image:
+            os.remove(settings.MEDIA_ROOT+'/' +post.image.name)
         post.delete()
     return HttpResponse()
 

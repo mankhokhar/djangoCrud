@@ -42,12 +42,14 @@
 
 function edit_post_handler(event){
     event.preventDefault();
-    let post_id = parseInt($(this).parents('.post').attr('id').match(/[0-9]+/)[0]);
-     let data = { 'post_id': post_id,
-                 'post_title': $(this).find('#post_title').val(),
-                 'post_desc': $(this).find('#post_desc').val()}
-    serverRequestControl(this, method='POST', url="{% url 'posts:update_post' %}", id=post_id,
+    if ($(this).valid){
+        let post_id = parseInt($(this).parents('.post').attr('id').match(/[0-9]+/)[0]);
+        let data = { 'post_id': post_id,
+                     'post_title': $(this).find('#post_title').val(),
+                     'post_desc': $(this).find('#post_desc').val()}
+        serverRequestControl(this, method='POST', url="{% url 'posts:update_post' %}", id=post_id,
                         data=data, callback= update_post)
+                       }
 }
 
 function delete_post_handler(event){

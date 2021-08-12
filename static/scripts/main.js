@@ -60,10 +60,23 @@ function serverRequestControl(element, method, url, id, data ,callback){
     });
 }
 
-$(document.ready(function(){
+$(document).ready(function(){
     $('#create_form').validate({
+        rules:{
+            post_title: {
+                required: true,
+                maxlength: 200,
+            }
+        }
+    }),
+
+    $('.post_edit_form').validate({
+        rules:{
+            post_title: {
+                required: true,
+                maxlength: 200,
+            }
+        }
     })
-
 })
-
 
