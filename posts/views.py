@@ -1,20 +1,28 @@
 import json
+import os
 
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template.loader import render_to_string
 from django.middleware.csrf import get_token
+from django.conf import settings
 
 
 from .models import Post, Comment
-from .forms import CommentForm
+from .forms import CommentForm, PostForm
 # Create your views here.
 
 
-def post_list_view(request):
+def post_list_view(request, post_form=PostForm()):
     posts = Post.objects.order_by('-pub_date')
     comment_form = CommentForm()
-    return render(request, 'posts/post_list.html', context={'posts_list': posts, 'comment_form': comment_form})
+    return render(request, 'posts/post_list.html', context={'posts_list': posts, 'comment_form': comment_form, 'post_form': post_form})
+
+
+def detail_view(request, pk):
+    post = Post.objects.get(pk=pk)
+    comment_form = CommentForm()
+    return render(request, 'posts/details.html', context={'post': post, 'comment_form': comment_form})
 
 
 def react(request):
@@ -31,7 +39,7 @@ def react(request):
 def search_post(request):
     query_parameter = request.GET['q']
     posts = Post.objects.filter(title__icontains=query_parameter).order_by('-pub_date')
-    html = render_to_string('posts/post.html', {'posts_list': posts, 'comment_form': CommentForm, 'csrf_token': get_token(request)})
+    html = render_to_string('posts/list_view.html', {'posts_list': posts, 'comment_form': CommentForm, 'csrf_token': get_token(request)})
     return HttpResponse(html)
 
 
@@ -43,14 +51,16 @@ def add_comment(request):
             post = get_object_or_404(Post, pk=post_id)
             comment = post.comment_set.create(comment_text=request.POST['comment_text'])
             html = render_to_string('posts/comment.html',
-                                    {'comment': comment , 'csrf_token': get_token(request), 'comment_form': CommentForm})
+                                    {'comment': comment, 'csrf_token': get_token(request), 'comment_form': CommentForm})
             return HttpResponse(
                 json.dumps({'comment_id': comment.id, 'html_view': html}),
                 content_type='application/json'
             )
+        else:
+            post_list_view(request, form)
     else:
         form = CommentForm()
-    return HttpResponseRedirect('/')
+    return
 
 
 def update_comment(request):
@@ -67,19 +77,49 @@ def update_comment(request):
             )
     else:
         form = CommentForm()
-    return HttpResponseRedirect('/')
+    return render(request, 'posts/list_view.html', {'comment_form': form, 'csrf_token': get_token(request)})
+    # return HttpResponseRedirect('/')
 
 
 def delete_comment(request):
-    comment_id = request.GET['comment_id']
-    comment = get_object_or_404(Comment, pk=comment_id)
+    comment_id = request.GET['comment_id'];
+    comment = get_object_or_404(Comment, pk=comment_id);
     comment.delete()
     return HttpResponse()
 
+
 def add_post(request):
     if request.method == 'POST':
-        print(request.POST['post_title'], request.FILES['post_file'].name, request.POST['post_desc'])
-        post = Post.objects.create(title=request.POST['post_title'], image=request.FILES['post_file'], description=request.POST['post_desc'])
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = Post.objects.create(title=form.cleaned_data.get('title'), image=form.cleaned_data.get('image'),
+                                       description=form.cleaned_data.get('description'))
+        else:
+            return post_list_view(request, form)
+
+    else:
+        form = PostForm()
 
     return HttpResponseRedirect('/')
 
+
+def delete_post(request):
+    if request.method == 'POST':
+        post = get_object_or_404(Post, pk=request.POST.get('post_id'))
+        if post.image:
+            os.remove(settings.MEDIA_ROOT+'/' +post.image.name)
+        post.delete()
+    return HttpResponse()
+
+
+def update_post(request):
+    if request.method == 'POST':
+        post = get_object_or_404(Post, pk=request.POST.get('post_id'))
+        post.title = request.POST.get('post_title')
+        post.description = request.POST.get('post_desc')
+        post.save()
+        return HttpResponse(
+            json.dumps({'post_title': post.title,
+                        'post_desc': post.description}),
+            content_type='application.json'
+        )
